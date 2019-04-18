@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"fmt"
 
 	"github.com/containerd/console"
 	"github.com/moby/buildkit/client"
@@ -49,7 +50,7 @@ var buildCommand = cli.Command{
 		},
 		cli.StringFlag{
 			Name:  "progress",
-			Usage: "Set type of progress (auto, plain, tty). Use plain to show container output",
+			Usage: "Set type of progress (auto, plain, tty, json). Use plain to show container output",
 			Value: "auto",
 		},
 		cli.StringFlag{
@@ -284,6 +285,15 @@ func buildAction(clicontext *cli.Context) error {
 			}
 			c = cf
 		case "plain":
+		case "json":
+			for ss := range displayCh {
+				srep, err := json.Marshal(ss)
+				if err != nil {
+					return err
+				}
+				fmt.Println(string(srep))
+			}
+			return nil
 		default:
 			return errors.Errorf("invalid progress value : %s", progressOpt)
 		}
